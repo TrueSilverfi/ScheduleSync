@@ -6,6 +6,9 @@ import HotspotCard from '@/components/hotspot-card';
 import TranscriptViewer from '@/components/transcript-viewer';
 import ActionableInsights from '@/components/actionable-insights';
 import OAuthBanner from '@/components/oauth-banner';
+import SubscriberAnalytics from '@/components/subscriber-analytics';
+import ImpressionAnalytics from '@/components/impression-analytics';
+import VideoComparison from '@/components/video-comparison';
 import { fetchVideoAnalysis, checkAuthStatus, sendEmailReport } from '@/lib/youtube';
 import { useToast } from '@/hooks/use-toast';
 import { Video, Hotspot, RetentionData, Captions, ActionableInsight } from '@/types';
@@ -188,6 +191,17 @@ export default function RetentionAnalysis() {
             </div>
           </div>
           
+          {/* Enhanced Analytics Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <SubscriberAnalytics videoId={selectedVideoId} />
+            <ImpressionAnalytics videoId={selectedVideoId} />
+          </div>
+
+          {/* Video Comparison */}
+          <div className="mb-6">
+            <VideoComparison currentVideoId={selectedVideoId} />
+          </div>
+
           {/* Actionable Insights */}
           {analysisData.hotspots.length > 0 && (
             <ActionableInsights 

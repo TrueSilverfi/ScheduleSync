@@ -34,6 +34,13 @@ export const videos = pgTable("videos", {
   comments: integer("comments").default(0),
   duration: text("duration"),
   durationSeconds: integer("duration_seconds"),
+  // New analytics fields
+  subscribersGained: integer("subscribers_gained").default(0),
+  subscribersLost: integer("subscribers_lost").default(0),
+  impressions: integer("impressions").default(0),
+  clickThroughRate: real("click_through_rate").default(0),
+  averageWatchTime: real("average_watch_time").default(0),
+  watchTimePercentage: real("watch_time_percentage").default(0),
   userId: integer("user_id").references(() => users.id),
 });
 
@@ -97,9 +104,27 @@ export const reports = pgTable("reports", {
   estimatedImprovement: text("estimated_improvement"),
 });
 
+// Video Comparisons Schema
+export const videoComparisons = pgTable("video_comparisons", {
+  id: text("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  video1Id: text("video1_id").references(() => videos.id),
+  video2Id: text("video2_id").references(() => videos.id),
+  comparisonInsights: text("comparison_insights"),
+  performanceGap: real("performance_gap"),
+  keyDifferences: text("key_differences").array(),
+  recommendations: text("recommendations").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertReportSchema = createInsertSchema(reports).omit({
   id: true,
   generatedAt: true,
+});
+
+export const insertVideoComparisonSchema = createInsertSchema(videoComparisons).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Type definitions
@@ -127,6 +152,9 @@ export type InsertHotspot = z.infer<typeof insertHotspotSchema>;
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = z.infer<typeof insertReportSchema>;
 
+export type VideoComparison = typeof videoComparisons.$inferSelect;
+export type InsertVideoComparison = z.infer<typeof insertVideoComparisonSchema>;
+
 // Additional composite types for API responses
 export interface RetentionData {
   videoId: string;
@@ -150,4 +178,41 @@ export interface VideoAnalysisResponse {
   retentionData: RetentionData;
   captions: Captions;
   hotspots: Hotspot[];
+}
+
+export interface VideoComparisonResult {
+  video1: Video;
+  video2: Video;
+  performanceMetrics: {
+    viewsRatio: number;
+    engagementRatio: number;
+    retentionRatio: number;
+    subscriberGrowthRatio: number;
+    ctrRatio: number;
+  };
+  insights: string;
+  keyDifferences: string[];
+  recommendations: string[];
+}
+
+export interface SubscriberAnalytics {
+  videoId: string;
+  subscribersGained: number;
+  subscribersLost: number;
+  netGrowth: number;
+  growthRate: number;
+}
+
+export interface ImpressionAnalytics {
+  videoId: string;
+  impressions: number;
+  clickThroughRate: number;
+  averageWatchTime: number;
+  watchTimePercentage: number;
+  impressionSource: {
+    browse: number;
+    search: number;
+    suggested: number;
+    external: number;
+  };
 }
